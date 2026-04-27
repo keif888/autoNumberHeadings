@@ -75,10 +75,12 @@ function showSidebar() {
  */
 
 function numberHeadingsAdd() {
-  numberHeadings(true);
+  let up = getPreferences();
+  numberHeadings(true, (up.skipHeadings.toLowerCase() === "true"), up.skippedLevels, (up.titlesRestartNumbering.toLowerCase() === "true"), false, (up.appendixUsesLettering.toLowerCase() === "true"), up.appendixText);
 }
 function numberHeadingsRemove() {
-  numberHeadings(false);
+  let up = getPreferences();
+  numberHeadings(false, (up.skipHeadings.toLowerCase() === "true"), up.skippedLevels, (up.titlesRestartNumbering.toLowerCase() === "true"), false, (up.appendixUsesLettering.toLowerCase() === "true"), up.appendixText);
 }
 function increaseHeadingLevels() {
   changeHeadingLevels("up")
@@ -93,23 +95,33 @@ function decreaseHeadingLevels() {
  *
  * @param {string} action The single word description of the action to perform.
  * @param {boolean} skipHeadings Whether to process all or only on some levels.
+ * @param {string} skippedLevels The levels to skip as a comma separated list.
+ * @param {boolean} titlesRestartNumbering Whether a Title will reset numbering.
  * @param {boolean} savePrefs Whether to save the current options.
+ * @param {boolean} appendixUsesLettering Whether the text from appendixText will trigger letter and number reset
+ * @param {string} appendixText The text string that an Appendix is indicated by.  Default = Appendix #:
  * @return {Object} Not implemented: Object containing the resulting text and the result of the
  *     operation (success or error).
  */
-function processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbering, selectionOnly, savePrefs) {
+function processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbering, selectionOnly, savePrefs, appendixUsesLettering, appendixText) {
   if (savePrefs) {
-    if (skippedLevels.match(/^[1-6,; e and y-]+$/) == null)
-      return false
 
-    skippedLevels = skippedLevels.replace(/\D/g, '')
+    if (skipHeadings) {
+      if (skippedLevels.match(/^[1-6,; e and y-]+$/) == null) {
+        Logger.log(`skippedLevels is in the wrong format.  Received ${skippedLevels}`);
+        return false
+      }
+      skippedLevels = skippedLevels.replace(/\D/g, '')
+    }
 
-    PropertiesService.getUserProperties()
+    PropertiesService.getDocumentProperties()
       .setProperty('action', action)
       .setProperty('skipHeadings', skipHeadings)
       .setProperty('skippedLevels', skippedLevels)
       .setProperty('titlesRestartNumbering', titlesRestartNumbering)
-      .setProperty('selectionOnly', selectionOnly);
+      .setProperty('selectionOnly', selectionOnly)
+      .setProperty('appendixUsesLettering', appendixUsesLettering)
+      .setProperty('appendixText', appendixText);
   }
 
   let result
@@ -126,12 +138,12 @@ function processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbe
 
     case 'remove':
       // 
-      result = numberHeadings(false, skipHeadings, skippedLevels, titlesRestartNumbering, selectionOnly);
+      result = numberHeadings(false, skipHeadings, skippedLevels, titlesRestartNumbering, selectionOnly, appendixUsesLettering, appendixText);
       break
 
     default:
       //
-      result = numberHeadings(true, skipHeadings, skippedLevels, titlesRestartNumbering, selectionOnly);
+      result = numberHeadings(true, skipHeadings, skippedLevels, titlesRestartNumbering, selectionOnly, appendixUsesLettering, appendixText);
       break
   }
   // const text = getSelectedText().join('\n');
@@ -139,10 +151,16 @@ function processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbe
 }
 
 
-function numberHeadings(add = false, skipHeadings = false, skippedLevels, titlesRestartNumbering, selectionOnly) {
+function numberHeadings(add = false, skipHeadings = false, skippedLevels, titlesRestartNumbering, selectionOnly, appendixUsesLettering = true, appendixText = "Appendix #:") {
   let document = DocumentApp.getActiveDocument();
   let paragraphs = selectionOnly ? document.getSelection().getRangeElements().map(re => re.getElement().asParagraph()) : document.getParagraphs();
   let numbers = [0, 0, 0, 0, 0, 0, 0];
+  let appendix = false;
+  let appendixHeaders = 'ABCDEFGHIJKLMNOPQRSTUVWXZY';
+  let appendixPrefix = 'Appendix ';
+  let appendixPostfix = ':';
+  // let appendixFind = /^placeholder #:/
+  // let appendixHeadingFind = /^(placeholder #:|# )/
   let headingsToProcessRegex = /HEADING\d/
   let before = []
   let after = []
@@ -150,6 +168,29 @@ function numberHeadings(add = false, skipHeadings = false, skippedLevels, titles
   if (skipHeadings) {
     headingsToProcessRegex = eval('/HEADING[' + skippedLevels + ']/')
   }
+
+  if (appendixUsesLettering && appendixText.length > 0) {
+    if (appendixText.includes("#")) {
+      appendixPrefix = appendixText.substring(0, appendixText.indexOf("#"));
+      if (appendixText.length == appendixText.indexOf("#")) {
+        appendixPostfix = " "
+      } else {
+        appendixPostfix = appendixText.substring(appendixText.indexOf("#")+1);
+      }
+    } else {
+      Logger.log(`Appendix Text string of ${appendixText} is missing the required #`);
+      return {
+        before: before.join("\n"),
+        after: after.join("\n")
+      }
+    }
+  }
+
+  let appendixFind = new RegExp(`^${appendixPrefix}#${appendixPostfix}`);
+  let appendixHeadingFind = new RegExp(`^(${appendixPrefix}#${appendixPostfix}|# )`);
+  let appendixFindText = `^${appendixPrefix}[A-Z]${appendixPostfix}`;
+  let appendixFindHash = `^${appendixPrefix}#${appendixPostfix}`;
+  let appendixReplaceHash = `${appendixPrefix}#${appendixPostfix}`;
 
   for (let i in paragraphs) {
     let element = paragraphs[i];
@@ -171,21 +212,44 @@ function numberHeadings(add = false, skipHeadings = false, skippedLevels, titles
     }
 
     before.push(element.getText())
-    element.replaceText("^[0-9]+(\\.[0-9]+)*\\. ", "")
-
-    if (add == true) {
+    // If I am a Heading, replace the number/letter with the placemarker #
+    element.replaceText("^[0-9]+(\\.[0-9]+)*\\. ", "# ")
+    if (appendixUsesLettering) {
+      element.replaceText(appendixFindText, appendixReplaceHash)
+    }
+    text = element.getText() + '';
+    
+    if (add == true && text.match(appendixHeadingFind)) {
       let level = new RegExp(/HEADING(\d)/).exec(type)[1];
       let numbering = '';
+      // Reset numbering if we are the 1st Appendix (only level 1), or the 1st level 1 that isn't an appendix.
+      if (level == 1 && text.match(appendixFind) && appendix == false) {
+        appendix = true;
+        numbers = [0, 0, 0, 0, 0, 0, 0];
+      } else if (level == 1 && text.match(appendixFind) == false && appendix == true) {
+        appendix = false;
+        numbers = [0, 0, 0, 0, 0, 0, 0];
+      }
 
       numbers[level]++;
       for (let currentLevel = 1; currentLevel <= 6; currentLevel++) {
-        if (currentLevel <= level) {
-          numbering += numbers[currentLevel] + '.';
+        if (appendix && currentLevel == 1 && level == currentLevel) {
+          numbering += appendixHeaders.substring(numbers[currentLevel]-1, numbers[currentLevel]);
         } else {
-          numbers[currentLevel] = 0;
+          if (currentLevel <= level) {
+            if ((appendix && currentLevel > 1) || !appendix) {
+              numbering += numbers[currentLevel] + '.';
+            }
+          } else {
+            numbers[currentLevel] = 0;
+          }
         }
       }
-      element.insertText(0, numbering + ' ')
+      if (appendix && level == 1) {
+        element.replaceText(appendixFindHash, appendixPrefix + numbering + appendixPostfix)
+      } else {
+        element.replaceText("^# ", numbering + ' ')
+      }
     }
     after.push(element.getText())
   }
@@ -271,11 +335,13 @@ function changeHeadingLevels(direction = '', skipHeadings = false, skippedLevels
  *     they exist.
  */
 function getPreferences() {
-  const userProperties = PropertiesService.getUserProperties();
+  const userProperties = PropertiesService.getDocumentProperties();
   return {
     action: userProperties.getProperty('action'),
     skipHeadings: userProperties.getProperty('skipHeadings'),
     skippedLevels: userProperties.getProperty('skippedLevels'),
-    titlesRestartNumbering: userProperties.getProperty('titlesRestartNumbering')
+    titlesRestartNumbering: userProperties.getProperty('titlesRestartNumbering'),
+    appendixUsesLettering: userProperties.getProperty('appendixUsesLettering'),
+    appendixText: userProperties.getProperty('appendixText')
   };
 }
