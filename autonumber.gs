@@ -345,3 +345,48 @@ function getPreferences() {
     appendixText: userProperties.getProperty('appendixText')
   };
 }
+
+/**
+ * Converts the supplied number into Roman Numerals.
+ * There is no Zero in Roman Numerals!
+ *
+ * @param  {number} num The number to convert into Roman Numerals
+ * @param  {boolean} uppercase Whether the result is to be in upper case
+ * @return {string} The resultant Roman Numberal
+ **/
+function convertToRoman(num, uppercase = false) {
+  const lookup = {
+    M: 1000, CM: 900, D: 500, CD: 400,
+    C: 100, XC: 90, L: 50, XL: 40,
+    X: 10, IX: 9, V: 5, IV: 4, I: 1
+  };
+  let roman = '';
+  for (let i in lookup) {
+    while (num >= lookup[i]) {
+      roman += i;
+      num -= lookup[i];
+    }
+  }
+  return uppercase ? roman : roman.toLowerCase();
+}
+
+/**
+ * Converts the supplied number into a-z (or A-Z if uppercase is true).
+ * On reaching 27 it goes to aa, 53 it goes to aaa, etc.
+ *
+ * @param  {number} num The number to convert into Alphas
+ * @param  {boolean} uppercase Whether the result is to be in upper case
+ * @return {string} The resultant Alphas
+ **/
+function convertToAlpha(num, uppercase = false) {
+  const validchars = 'abcdefghijklmnopqrstuvwxyz';
+  num = Math.abs(num);
+  var remainder = num % 26;
+  num = Math.floor(num / 26);
+  if (remainder == 0 && num > 0) {
+    remainder = 26;
+    num--;
+  }
+  let char = validchars.substring(remainder-1, remainder);
+  return uppercase ? char.repeat(num + 1).toUpperCase() : char.repeat(num + 1);
+}
