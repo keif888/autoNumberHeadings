@@ -86,9 +86,180 @@
             <input type="radio" name="action" id="radio-demote" value="demote">
             <label for="radio-demote">Demote <small>(Title➙Title, H1➙H2 ... H6➙Normal)</small></label>
           </div>
+          <div>
+            <input type="radio" name="action" id="radio-save" value="save">
+            <label for="radio-save">Save <small>(save the following settings as default)</small></label>
+          </div>
         </div>
       </div>
-      
+
+      <div class="block">
+        <b>Styles</b>
+        <div><small>Style 1.1.1.1.1.1. will apply to all levels if chosen on level 1, and only uses numbers.</small></div>
+        <div>
+          <label for="heading-1-style" style="display: inline-block;width: 160px;">Choose Heading 1 style:</label>
+          <select id="heading-1-style" name="heading-1-style" style="width: 90px;">
+            <option value="number" selected>1</option>
+            <option value="d-number">01</option>
+            <option value="l-alpha">a</option>
+            <option value="u-alpha">A</option>
+            <option value="l-roman">i</option>
+            <option value="u-roman">I</option>
+          </select>
+        </div>
+        <div>
+          <label for="heading-1-breaker" style="display: inline-block;width: 160px;">Choose Heading 1 breaker:</label>
+          <select id="heading-1-breaker" name="heading-1-breaker" style="width: 90px;">
+            <option value="dot">1.</option>
+            <option value="running-dot" selected>1.1.1.1.1.1.</option>
+            <option value="close-bracket">1)</option>
+            <option value="open-close-bracket">(1)</option>
+            <option value="dash">1-</option>
+            <option value="colon">1:</option>
+            <option value="semicolon">1;</option>
+          </select>
+        </div>
+        <div>
+          <label for="heading-2-style" style="display: inline-block;width: 160px;">Choose Heading 2 style:</label>
+          <select id="heading-2-style" name="heading-2-style" style="width: 90px;">
+            <option value="number" selected>1</option>
+            <option value="d-number">01</option>
+            <option value="l-alpha">a</option>
+            <option value="u-alpha">A</option>
+            <option value="l-roman">i</option>
+            <option value="u-roman">I</option>
+          </select>
+        </div>
+        <div>
+          <label for="heading-2-breaker" style="display: inline-block;width: 160px;">Choose Heading 2 breaker:</label>
+          <select id="heading-2-breaker" name="heading-2-breaker" style="width: 90px;">
+            <option value="dot">1.</option>
+            <option value="close-bracket">1)</option>
+            <option value="open-close-bracket">(1)</option>
+            <option value="dash">1-</option>
+            <option value="colon">1:</option>
+            <option value="semicolon">1;</option>
+          </select>
+        </div>
+        <div>
+          <label for="heading-3-style" style="display: inline-block;width: 160px;">Choose Heading 3 style:</label>
+          <select id="heading-3-style" name="heading-3-style" style="width: 90px;">
+            <option value="number" selected>1</option>
+            <option value="d-number">01</option>
+            <option value="l-alpha">a</option>
+            <option value="u-alpha">A</option>
+            <option value="l-roman">i</option>
+            <option value="u-roman">I</option>
+          </select>
+        </div>
+        <div>
+          <label for="heading-3-breaker" style="display: inline-block;width: 160px;">Choose Heading 3 breaker:</label>
+          <select id="heading-3-breaker" name="heading-3-breaker" style="width: 90px;">
+            <option value="dot">1.</option>
+            <option value="close-bracket">1)</option>
+            <option value="open-close-bracket">(1)</option>
+            <option value="dash">1-</option>
+            <option value="colon">1:</option>
+            <option value="semicolon">1;</option>
+          </select>
+        </div>
+        <div>
+          <label for="heading-4-style" style="display: inline-block;width: 160px;">Choose Heading 4 style:</label>
+          <select id="heading-4-style" name="heading-4-style" style="width: 90px;">
+            <option value="number" selected>1</option>
+            <option value="d-number">01</option>
+            <option value="l-alpha">a</option>
+            <option value="u-alpha">A</option>
+            <option value="l-roman">i</option>
+            <option value="u-roman">I</option>
+          </select>
+        </div>
+        <div>
+          <label for="heading-4-breaker" style="display: inline-block;width: 160px;">Choose Heading 4 breaker:</label>
+          <select id="heading-4-breaker" name="heading-4-breaker" style="width: 90px;">
+            <option value="dot">1.</option>
+            <option value="close-bracket">1)</option>
+            <option value="open-close-bracket">(1)</option>
+            <option value="dash">1-</option>
+            <option value="colon">1:</option>
+            <option value="semicolon">1;</option>
+          </select>
+        </div>
+        <div>
+          <label for="heading-5-style" style="display: inline-block;width: 160px;">Choose Heading 5 style:</label>
+          <select id="heading-5-style" name="heading-5-style" style="width: 90px;">
+            <option value="number" selected>1</option>
+            <option value="d-number">01</option>
+            <option value="l-alpha">a</option>
+            <option value="u-alpha">A</option>
+            <option value="l-roman">i</option>
+            <option value="u-roman">I</option>
+          </select>
+        </div>
+        <div>
+          <label for="heading-5-breaker" style="display: inline-block;width: 160px;">Choose Heading 5 breaker:</label>
+          <select id="heading-5-breaker" name="heading-5-breaker" style="width: 90px;">
+            <option value="dot">1.</option>
+            <option value="close-bracket">1)</option>
+            <option value="open-close-bracket">(1)</option>
+            <option value="dash">1-</option>
+            <option value="colon">1:</option>
+            <option value="semicolon">1;</option>
+          </select>
+        </div>
+        <div>
+          <label for="heading-6-style" style="display: inline-block;width: 160px;">Choose Heading 6 style:</label>
+          <select id="heading-6-style" name="heading-6-style" style="width: 90px;">
+            <option value="number" selected>1</option>
+            <option value="d-number">01</option>
+            <option value="l-alpha">a</option>
+            <option value="u-alpha">A</option>
+            <option value="l-roman">i</option>
+            <option value="u-roman">I</option>
+          </select>
+        </div>
+        <div>
+          <label for="heading-6-breaker" style="display: inline-block;width: 160px;">Choose Heading 6 breaker:</label>
+          <select id="heading-6-breaker" name="heading-6-breaker" style="width: 90px;">
+            <option value="dot">1.</option>
+            <option value="close-bracket">1)</option>
+            <option value="open-close-bracket">(1)</option>
+            <option value="dash">1-</option>
+            <option value="colon">1:</option>
+            <option value="semicolon">1;</option>
+          </select>
+        </div>
+        <div>
+          <p></p>
+          <b>Number to Title Separator</b>
+          <div>
+            <label for="heading-separator" style="display: inline-block;width: 160px;">Choose Number to Title separator:</label>
+            <select id="heading-separator" name="heading-separator" style="width: 90px;">
+              <option value="space" selected>Space (1. )</option>
+              <option value="tab">Tab (1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</option>
+              <option value="dash">Dash (1.-)</option>
+              <option value="colon">Colon (1.:)</option>
+              <option value="semicolon">Semicolon (1.;)</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <p></p>
+          <div><b>Appendix Style</b></div><div><small>Appendicies will be "numbered" with capital alpha letters for Heading 1, and for Heading 2 - 6, use Style 2 - 6 from above.</small></div>
+          <div>
+            <input type="checkbox" id="appendix-separate-style">
+            <label for="appendix-separate-style">Appendix separate style?</label>
+          </div>
+          <div class="block form-group">
+            <label for="appendix-prefix">Appendix prefix (Default "Appendix " with a trailing space)</label>
+            <input class="width-20" id="appendix-prefix" rows="1" placeholder="Appendix "></input>
+          </div>
+        </div>
+      </div>
+      <div class="block">
+        <input type="checkbox" id="numbered-and-hash">
+        <label for="numbered-and-hash">Restrict to only already numbered or prefixed with #?</label>
+      </div>
       <div class="block">
         <input type="checkbox" id="selection-only">
         <label for="selection-only">Restrict to selected paragraphs</label>
@@ -98,24 +269,12 @@
         <label for="titles-restart-numbering">Titles restart numbering</label>
       </div>
       <div class="block">
-        <input type="checkbox" id="appendix-uses-lettering">
-        <label for="appendix-uses-lettering">Appendix uses lettering</label>
-      </div>
-      <div class="block form-group">
-        <label for="appendix-text"><b>Appendix text pattern</b> (optional)</label>
-        <input class="width-20" id="appendix-text" rows="1" placeholder="Appendix #:"></input>
-      </div>
-      <div class="block">
         <input type="checkbox" id="skip-headings">
         <label for="skip-headings">Process only headings below</label>
       </div>
       <div class="block form-group">
         <label for="skipped-levels"><b>Headings to process</b> (optional)</label>
         <input class="width-100" id="skipped-levels" rows="10" placeholder="1 2 3"></input>
-      </div>
-      <div class="block">
-        <input type="checkbox" id="save-prefs">
-        <label for="save-prefs">Save options as default</label>
       </div>
       <div class="block" id="button-bar">
         <button class="blue" id="run-autonumber">Run</button>
@@ -137,7 +296,7 @@
         target='_blank'>lpanebr</a></span>
   </div>
 
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script>
     /**
      * On document load, assign click handlers to each button and try to load the
@@ -160,11 +319,26 @@
       $('input:radio[name="action"]')
         .filter('[value=' + autonumberPrefs.action + ']')
         .attr('checked', true);
-      $('#skip-headings').prop('checked', autonumberPrefs.skipHeadings)
+      $("#heading-1-style").val(autonumberPrefs.styleData.h1style);
+      $("#heading-1-breaker").val(autonumberPrefs.styleData.h1breaker);
+      $("#heading-2-style").val(autonumberPrefs.styleData.h2style);
+      $("#heading-2-breaker").val(autonumberPrefs.styleData.h2breaker);
+      $("#heading-3-style").val(autonumberPrefs.styleData.h3style);
+      $("#heading-3-breaker").val(autonumberPrefs.styleData.h3breaker);
+      $("#heading-4-style").val(autonumberPrefs.styleData.h4style);
+      $("#heading-4-breaker").val(autonumberPrefs.styleData.h4breaker);
+      $("#heading-5-style").val(autonumberPrefs.styleData.h5style);
+      $("#heading-5-breaker").val(autonumberPrefs.styleData.h5breaker);
+      $("#heading-6-style").val(autonumberPrefs.styleData.h6style);
+      $("#heading-6-breaker").val(autonumberPrefs.styleData.h6breaker);
+      $("#heading-separator").val(autonumberPrefs.styleData.hseparator);
+      $("appendix-separate-style").prop('checked', autonumberPrefs.styleData.appendix);
+      $("appendix-prefix").val(autonumberPrefs.styleData.appendixPrefix);
+      $('#numbered-and-hash').prop('checked', autonumberPrefs.restrictWithHash.toLowerCase() === "true");
+      $('#selection-only').prop('checked', autonumberPrefs.selectionOnly.toLowerCase() === "true");
+      $('#titles-restart-numbering').prop('checked', autonumberPrefs.titlesRestartNumbering.toLowerCase() === "true");
+      $('#skip-headings').prop('checked', autonumberPrefs.skipHeadings.toLowerCase() === "true");
       $('#skipped-levels').val(autonumberPrefs.skippedLevels);
-      $('#titles-restart-numbering').prop('checked', autonumberPrefs.titlesRestartNumbering);
-      $('#appendix-uses-lettering').prop('checked', autonumberPrefs.appendixUsesLettering);
-      $('#appendix-text').val(authnumberPrefs.appendixText);
     }
 
     /**
@@ -175,13 +349,28 @@
       this.disabled = true;
       $('#error').remove();
       const action = $('input[name=action]:checked').val();
+      const styleData = {
+        h1style: $("#heading-1-style").val(),
+        h1breaker: $("#heading-1-breaker").val(),
+        h2style: $("#heading-2-style").val(),
+        h2breaker: $("#heading-2-breaker").val(),
+        h3style: $("#heading-3-style").val(),
+        h3breaker: $("#heading-3-breaker").val(),
+        h4style: $("#heading-4-style").val(),
+        h4breaker: $("#heading-4-breaker").val(),
+        h5style: $("#heading-5-style").val(),
+        h5breaker: $("#heading-5-breaker").val(),
+        h6style: $("#heading-6-style").val(),
+        h6breaker: $("#heading-6-breaker").val(),
+        hseparator: $("#heading-separator").val(),
+        appendix: $("#appendix-separate-style").is(':checked'),
+        appendixPrefix: $("#appendix-prefix").val()
+      };
+      const restrictWithHash = $("#numbered-and-hash").is(':checked');
+      const selectionOnly = $('#selection-only').is(':checked');
+      const titlesRestartNumbering = $('#titles-restart-numbering').is(':checked');
       const skipHeadings = $('#skip-headings').is(':checked');
       const skippedLevels = $('#skipped-levels').val();
-      const titlesRestartNumbering = $('#titles-restart-numbering').is(':checked');
-      const appendixUsesLettering = $('#appendix-uses-lettering').is(':checked');
-      const appendixText = $('#appendix-text').val();
-      const selectionOnly = $('#selection-only').is(':checked');
-      const savePrefs = $('#save-prefs').is(':checked');
       google.script.run
         .withSuccessHandler(
           function (textAndResult, element) {
@@ -196,7 +385,7 @@
             element.disabled = false;
           })
         .withUserObject(this)
-        .processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbering, selectionOnly, savePrefs, appendixUsesLettering, appendixText);
+        .processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbering, selectionOnly, styleData, restrictWithHash);
     }
 
     /**
