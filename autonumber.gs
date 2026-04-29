@@ -80,7 +80,7 @@ function numberHeadingsAdd() {
     // Assume that if anyHeadings is missing, then there are no preferences
     numberHeadings(true, false, '', false, false, null, true);
   } else {
-    numberHeadings(true, (up.skipHeadings.toLowerCase() === "true"), up.skippedLevels, (up.titlesRestartNumbering.toLowerCase() === "true"), (up.selectionOnly.toLowerCase() === "true"), up.styleData, (up.anyHeadings.toLowerCase() === "true"));
+    numberHeadings(true, (up.skipHeadings.toLowerCase() === "true"), up.skippedLevels, (up.titlesRestartNumbering.toLowerCase() === "true"), up.styleData, (up.anyHeadings.toLowerCase() === "true"));
   }
 }
 function numberHeadingsRemove() {
@@ -89,7 +89,7 @@ function numberHeadingsRemove() {
     // Assume that if anyHeadings is missing, then there are no preferences
     numberHeadings(false, false, '', false, false, null, true);
   } else {
-    numberHeadings(false, (up.skipHeadings.toLowerCase() === "true"), up.skippedLevels, (up.titlesRestartNumbering.toLowerCase() === "true"), (up.selectionOnly.toLowerCase() === "true"), up.styleData, (up.anyHeadings.toLowerCase() === "true"));
+    numberHeadings(false, (up.skipHeadings.toLowerCase() === "true"), up.skippedLevels, (up.titlesRestartNumbering.toLowerCase() === "true"), up.styleData, (up.anyHeadings.toLowerCase() === "true"));
   }
 }
 function increaseHeadingLevels() {
@@ -112,22 +112,22 @@ function decreaseHeadingLevels() {
  * @return {Object} Not implemented: Object containing the resulting text and the result of the
  *     operation (success or error).
  */
-function processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbering, selectionOnly, styleData, anyHeadings) {
+function processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbering, styleData, anyHeadings) {
   let result
   switch (action) {
     case 'promote':
       // 
-      result = changeHeadingLevels("up", skipHeadings, skippedLevels, selectionOnly);
+      result = changeHeadingLevels("up", skipHeadings, skippedLevels);
       break
 
     case 'demote':
       // 
-      result = changeHeadingLevels("down", skipHeadings, skippedLevels, selectionOnly);
+      result = changeHeadingLevels("down", skipHeadings, skippedLevels);
       break
 
     case 'remove':
       // 
-      result = numberHeadings(false, skipHeadings, skippedLevels, titlesRestartNumbering, selectionOnly, styleData, anyHeadings);
+      result = numberHeadings(false, skipHeadings, skippedLevels, titlesRestartNumbering, styleData, anyHeadings);
       break
 
     case 'save':
@@ -144,7 +144,6 @@ function processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbe
         .setProperty('skipHeadings', skipHeadings)
         .setProperty('skippedLevels', skippedLevels)
         .setProperty('titlesRestartNumbering', titlesRestartNumbering)
-        .setProperty('selectionOnly', selectionOnly)
         .setProperty('styleData', JSON.stringify(styleData))
         .setProperty('anyHeadings', anyHeadings);
 
@@ -157,7 +156,7 @@ function processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbe
 
     default:
       //
-      result = numberHeadings(true, skipHeadings, skippedLevels, titlesRestartNumbering, selectionOnly, styleData, anyHeadings);
+      result = numberHeadings(true, skipHeadings, skippedLevels, titlesRestartNumbering, styleData, anyHeadings);
       break
   }
   // const text = getSelectedText().join('\n');
@@ -165,9 +164,10 @@ function processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbe
 }
 
 
-function numberHeadings(add = false, skipHeadings = false, skippedLevels, titlesRestartNumbering, selectionOnly, styleData, anyHeadings) {
+function numberHeadings(add = false, skipHeadings = false, skippedLevels, titlesRestartNumbering, styleData, anyHeadings) {
   let document = DocumentApp.getActiveDocument();
-  let paragraphs = selectionOnly ? document.getSelection().getRangeElements().map(re => re.getElement().asParagraph()) : document.getParagraphs();
+  const selection = DocumentApp.getActiveDocument().getSelection();
+  let paragraphs = (selection) ? selection.getRangeElements().map(re => re.isPartial() ? null : re.getElement().asParagraph()) : document.getParagraphs();
   let numbers = [0, 0, 0, 0, 0, 0, 0];
   let appendix = false;
   let appendixHeaders = 'ABCDEFGHIJKLMNOPQRSTUVWXZY';
@@ -231,6 +231,9 @@ function numberHeadings(add = false, skipHeadings = false, skippedLevels, titles
 
   for (let i in paragraphs) {
     let element = paragraphs[i];
+    if (element === null) {
+      continue;
+    }
     let text = element.getText() + '';
     let type = element.getHeading() + '';
 
@@ -312,10 +315,12 @@ function numberHeadings(add = false, skipHeadings = false, skippedLevels, titles
   }
 }
 
-function changeHeadingLevels(direction = '', skipHeadings = false, skippedLevels, selectionOnly) {
+function changeHeadingLevels(direction = '', skipHeadings = false, skippedLevels) {
   let document = DocumentApp.getActiveDocument()
   let body = document.getBody()
-  let paragraphs = selectionOnly ? document.getSelection().getRangeElements().map(re => re.getElement().asParagraph()) : document.getParagraphs();
+  const selection = DocumentApp.getActiveDocument().getSelection();
+  let paragraphs = (selection) ? selection.getRangeElements().map(re => re.isPartial() ? null : re.getElement().asParagraph()) : document.getParagraphs();
+
   let headingsToProcessRegex = /HEADING\d/
   let before = []
   let after = []
@@ -327,6 +332,9 @@ function changeHeadingLevels(direction = '', skipHeadings = false, skippedLevels
   let inserted_paragraph
   for (let i in paragraphs) {
     let current_paragraph = paragraphs[i];
+    if (current_paragraph === null) {
+      continue;
+    }
     let text = current_paragraph.getText() + '';
     let type = current_paragraph.getHeading() + '';
 
@@ -392,7 +400,6 @@ function getPreferences() {
     action: userProperties.getProperty('action'),
     styleData: JSON.parse(userProperties.getProperty('styleData')),
     anyHeadings: userProperties.getProperty('anyHeadings'),
-    selectionOnly: userProperties.getProperty('selectionOnly'),
     titlesRestartNumbering: userProperties.getProperty('titlesRestartNumbering'),
     skipHeadings: userProperties.getProperty('skipHeadings'),
     skippedLevels: userProperties.getProperty('skippedLevels')

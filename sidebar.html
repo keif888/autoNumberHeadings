@@ -276,10 +276,6 @@
             </div>
           </div>
           <div class="block">
-            <input type="checkbox" id="selection-only">
-            <label for="selection-only">Selected text only</label>
-          </div>
-          <div class="block">
             <input type="checkbox" id="titles-restart-numbering">
             <label for="titles-restart-numbering">Titles restart numbering</label>
           </div>
@@ -354,10 +350,13 @@
       $("#heading-6-style").val(autonumberPrefs.styleData.h6style);
       $("#heading-6-breaker").val(autonumberPrefs.styleData.h6breaker);
       $("#heading-separator").val(autonumberPrefs.styleData.hseparator);
-      $("appendix-separate-style").prop('checked', autonumberPrefs.styleData.appendix);
-      $("appendix-prefix").val(autonumberPrefs.styleData.appendixPrefix);
-      $('#any-headings').prop('checked', autonumberPrefs.anyHeadings.toLowerCase() === "true");
-      $('#selection-only').prop('checked', autonumberPrefs.selectionOnly.toLowerCase() === "true");
+      $("#appendix-separate-style").prop('checked', autonumberPrefs.styleData.appendix);
+      $("#appendix-prefix").val(autonumberPrefs.styleData.appendixPrefix);
+      if (anyHeadings) {
+        $("radio-matching-any").attr('checked', true);
+      } else {
+        $("radio-matching-hash-numbered").attr('checked', true);
+      }
       $('#titles-restart-numbering').prop('checked', autonumberPrefs.titlesRestartNumbering.toLowerCase() === "true");
       $('#skip-headings').prop('checked', autonumberPrefs.skipHeadings.toLowerCase() === "true");
       $('#skipped-levels').val(autonumberPrefs.skippedLevels);
@@ -389,7 +388,6 @@
         appendixPrefix: $("#appendix-prefix").val()
       };
       const anyHeadings = $('input[name=matching]:checked').val() == "radio-matching-any";
-      const selectionOnly = $('#selection-only').is(':checked');
       const titlesRestartNumbering = $('#titles-restart-numbering').is(':checked');
       const skipHeadings = $('#skip-headings').is(':checked');
       const skippedLevels = $('#skipped-levels').val();
@@ -407,7 +405,7 @@
             element.disabled = false;
           })
         .withUserObject(this)
-        .processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbering, selectionOnly, styleData, anyHeadings);
+        .processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbering, styleData, anyHeadings);
     }
 
     /**
