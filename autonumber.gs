@@ -442,14 +442,41 @@ function changeHeadingLevels(direction = '', skipHeadings = false, skippedLevels
  */
 function getPreferences() {
   const userProperties = PropertiesService.getDocumentProperties();
-  return {
-    action: userProperties.getProperty('action'),
-    styleData: JSON.parse(userProperties.getProperty('styleData')),
-    anyHeadings: userProperties.getProperty('anyHeadings'),
-    titlesRestartNumbering: userProperties.getProperty('titlesRestartNumbering'),
-    skipHeadings: userProperties.getProperty('skipHeadings'),
-    skippedLevels: userProperties.getProperty('skippedLevels')
-  };
+  if (userProperties.getProperty('anyHeadings') == null) {
+    return { 
+      action: "save",
+      styleData: {
+        h1style: "number",
+        h1breaker: "running-dot",
+        h2style: "number",
+        h2breaker: "running-dot",
+        h3style: "number",
+        h3breaker: "running-dot",
+        h4style: "number",
+        h4breaker: "running-dot",
+        h5style: "number",
+        h5breaker: "running-dot",
+        h6style: "number",
+        h6breaker: "running-dot",
+        hseparator: "space",
+        appendix: false,
+        appendixPrefix: "Appendix "
+      },
+      anyHeadings: "false", // This is a string as that is what the getProperty would return
+      titlesRestartNumbering: "false",
+      skipHeadings: "false",
+      skippedLevels: ""
+    }
+  } else {
+    return {
+      action: userProperties.getProperty('action'),
+      styleData: JSON.parse(userProperties.getProperty('styleData')),
+      anyHeadings: userProperties.getProperty('anyHeadings'),
+      titlesRestartNumbering: userProperties.getProperty('titlesRestartNumbering'),
+      skipHeadings: userProperties.getProperty('skipHeadings'),
+      skippedLevels: userProperties.getProperty('skippedLevels')
+    };
+  }
 }
 
 /**
