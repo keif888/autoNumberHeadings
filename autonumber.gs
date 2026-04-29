@@ -36,7 +36,6 @@ function onOpen(e) {
     .addSeparator()
     .addItem('Promote Headings (H1➙Title ... H6➙H5)', 'increaseHeadingLevels')
     .addItem('Demote Headings (Title➙Title, H1➙H2 ... H6➙Normal)', 'decreaseHeadingLevels')
-
     .addToUi();
 
 }
@@ -78,7 +77,7 @@ function numberHeadingsAdd() {
   let up = getPreferences();
   if (up.anyHeadings === null) {
     // Assume that if anyHeadings is missing, then there are no preferences
-    numberHeadings(true, false, '', false, false, null, true);
+    numberHeadings(true, false, '', false, null, false);
   } else {
     numberHeadings(true, (up.skipHeadings.toLowerCase() === "true"), up.skippedLevels, (up.titlesRestartNumbering.toLowerCase() === "true"), up.styleData, (up.anyHeadings.toLowerCase() === "true"));
   }
@@ -87,7 +86,7 @@ function numberHeadingsRemove() {
   let up = getPreferences();
   if (up.anyHeadings === null) {
     // Assume that if anyHeadings is missing, then there are no preferences
-    numberHeadings(false, false, '', false, false, null, true);
+    numberHeadings(false, false, '', false, null, false);
   } else {
     numberHeadings(false, (up.skipHeadings.toLowerCase() === "true"), up.skippedLevels, (up.titlesRestartNumbering.toLowerCase() === "true"), up.styleData, (up.anyHeadings.toLowerCase() === "true"));
   }
@@ -152,7 +151,7 @@ function processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbe
         after: ""
       }
 
-    break
+      break
 
     default:
       //
@@ -164,16 +163,26 @@ function processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbe
 }
 
 
+/**
+ * Applies or removes numbers from headings in the document.
+ *
+ * @param {boolean} add Set to true to refresh the numbers on headings, false to remove the numbers and replace with #
+ * @param {boolean} skipHeadings Whether to process all or only on some levels.
+ * @param {string} skippedLevels The levels to skip as a comma separated list.
+ * @param {boolean} titlesRestartNumbering Whether a Title will reset numbering.
+ * @param {object} styleData JSON object with the styling information
+ * @param {boolean} anyHeadings Whether to only process Headings starting with # or the defined pattern
+ * @return {Object} Object containing the before and after headings as a result of the operation.
+ */
 function numberHeadings(add = false, skipHeadings = false, skippedLevels, titlesRestartNumbering, styleData, anyHeadings) {
-  let document = DocumentApp.getActiveDocument();
+  const document = DocumentApp.getActiveDocument();
   const selection = DocumentApp.getActiveDocument().getSelection();
-  let paragraphs = (selection) ? selection.getRangeElements().map(re => re.isPartial() ? null : re.getElement().asParagraph()) : document.getParagraphs();
-  let numbers = [0, 0, 0, 0, 0, 0, 0];
-  let appendix = false;
-  let appendixHeaders = 'ABCDEFGHIJKLMNOPQRSTUVWXZY';
-  let headingsToProcessRegex = /HEADING\d/
-  let before = []
-  let after = []
+  const paragraphs = (selection) ? selection.getRangeElements().map(re => (re.isPartial() || re.getElement().getType() != DocumentApp.ElementType.PARAGRAPH) ? null : re.getElement().asParagraph()) : document.getParagraphs();
+  var numbers = [0, 0, 0, 0, 0, 0, 0];
+  var appendix = false;
+  var headingsToProcessRegex = /HEADING\d/
+  var before = []
+  var after = []
 
   if (skipHeadings) {
     headingsToProcessRegex = eval('/HEADING[' + skippedLevels + ']/')
@@ -181,21 +190,21 @@ function numberHeadings(add = false, skipHeadings = false, skippedLevels, titles
 
   if (styleData === null) {
     styleData = {
-        h1style: "number",
-        h1breaker: "running-dot",
-        h2style: "number",
-        h2breaker: "running-dot",
-        h3style: "number",
-        h3breaker: "running-dot",
-        h4style: "number",
-        h4breaker: "running-dot",
-        h5style: "number",
-        h5breaker: "running-dot",
-        h6style: "number",
-        h6breaker: "running-dot",
-        hseparator: "space",
-        appendix: false,
-        appendixPrefix: "Appendix "
+      h1style: "number",
+      h1breaker: "running-dot",
+      h2style: "number",
+      h2breaker: "running-dot",
+      h3style: "number",
+      h3breaker: "running-dot",
+      h4style: "number",
+      h4breaker: "running-dot",
+      h5style: "number",
+      h5breaker: "running-dot",
+      h6style: "number",
+      h6breaker: "running-dot",
+      hseparator: "space",
+      appendix: false,
+      appendixPrefix: "Appendix "
     }
   }
 
@@ -222,7 +231,7 @@ function numberHeadings(add = false, skipHeadings = false, skippedLevels, titles
 
   const appendixFind = new RegExp(`^${appendixPrefix}# `);
   const appendixHeadingFind = new RegExp(`^(${appendixPrefix}# |# )`);
-  const appendixFindText = `^${appendixPrefix}[A-Z]${allPostfix}`;
+  const appendixFindText = `^${appendixPrefix}[A-Z]+${allPostfix}`;
   const appendixFindHash = `^${appendixPrefix}# `;
   const appendixReplaceHash = `${appendixPrefix}# `;
 
@@ -273,17 +282,20 @@ function numberHeadings(add = false, skipHeadings = false, skippedLevels, titles
     }
 
     text = element.getText() + '';
-    
+
     if (add == true && text.match(appendixHeadingFind)) {
       let level = new RegExp(/HEADING(\d)/).exec(type)[1];
       let numbering = '';
-      // Reset numbering if we are the 1st Appendix (only level 1), or the 1st level 1 that isn't an appendix.
-      if (level == 1 && text.match(appendixFind) && appendix == false) {
-        appendix = true;
-        numbers = [0, 0, 0, 0, 0, 0, 0];
-      } else if (level == 1 && text.match(appendixFind) == false && appendix == true) {
-        appendix = false;
-        numbers = [0, 0, 0, 0, 0, 0, 0];
+
+      if (styleData.appendix) {
+        // Reset numbering if we are the 1st Appendix (only level 1), or the 1st level 1 that isn't an appendix.
+        if (level == 1 && text.match(appendixFind) && appendix == false) {
+          appendix = true;
+          numbers = [0, 0, 0, 0, 0, 0, 0];
+        } else if (level == 1 && text.match(appendixFind) == false && appendix == true) {
+          appendix = false;
+          numbers = [0, 0, 0, 0, 0, 0, 0];
+        }
       }
 
       numbers[level]++;
@@ -319,7 +331,7 @@ function changeHeadingLevels(direction = '', skipHeadings = false, skippedLevels
   let document = DocumentApp.getActiveDocument()
   let body = document.getBody()
   const selection = DocumentApp.getActiveDocument().getSelection();
-  let paragraphs = (selection) ? selection.getRangeElements().map(re => re.isPartial() ? null : re.getElement().asParagraph()) : document.getParagraphs();
+  const paragraphs = (selection) ? selection.getRangeElements().map(re => (re.isPartial() || re.getElement().getType() != DocumentApp.ElementType.PARAGRAPH) ? null : re.getElement().asParagraph()) : document.getParagraphs();
 
   let headingsToProcessRegex = /HEADING\d/
   let before = []
@@ -447,23 +459,23 @@ function convertToAlpha(num, uppercase = false) {
     remainder = 26;
     num--;
   }
-  let char = validchars.substring(remainder-1, remainder);
+  let char = validchars.substring(remainder - 1, remainder);
   return uppercase ? char.repeat(num + 1).toUpperCase() : char.repeat(num + 1);
 }
 
 function generateHeadingNumber(num, style, level) {
   switch (level) {
-    case 1: 
+    case 1:
       return generateNumber(num, style.h1style, style.h1breaker);
     case 2:
       return generateNumber(num, style.h2style, style.h2breaker);
-    case 3: 
+    case 3:
       return generateNumber(num, style.h3style, style.h3breaker);
-    case 4: 
+    case 4:
       return generateNumber(num, style.h4style, style.h4breaker);
-    case 5: 
+    case 5:
       return generateNumber(num, style.h5style, style.h5breaker);
-    case 6: 
+    case 6:
       return generateNumber(num, style.h6style, style.h6breaker);
   }
 }
