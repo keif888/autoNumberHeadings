@@ -9,6 +9,13 @@
  */
 
 /**
+ * 
+ * ////////////////////////////////////////////////////////////////////////////
+ *                            AddOn UI Functions
+ * ////////////////////////////////////////////////////////////////////////////
+ */
+
+/**
  * Creates a menu entry in the Google Docs UI when the document is opened.
  * This method is only used by the regular add-on, and is never called by
  * the mobile add-on version.
@@ -69,10 +76,14 @@ function showSidebar() {
 /**
  * 
  * ////////////////////////////////////////////////////////////////////////////
- *                            MY FUNCTIONS
+ *                            AddOn Functions
  * ////////////////////////////////////////////////////////////////////////////
  */
 
+/**
+ * Requests that heading's are added/refreshed
+ * Intended for menu to call
+ */
 function numberHeadingsAdd() {
   let up = getPreferences();
   if (up.anyHeadings === null) {
@@ -82,6 +93,11 @@ function numberHeadingsAdd() {
     numberHeadings(true, (up.skipHeadings.toLowerCase() === "true"), up.skippedLevels, (up.titlesRestartNumbering.toLowerCase() === "true"), up.styleData, (up.anyHeadings.toLowerCase() === "true"));
   }
 }
+
+/**
+ * Requests that heading's are removed
+ * Intended for menu to call
+ */
 function numberHeadingsRemove() {
   let up = getPreferences();
   if (up.anyHeadings === null) {
@@ -91,9 +107,19 @@ function numberHeadingsRemove() {
     numberHeadings(false, (up.skipHeadings.toLowerCase() === "true"), up.skippedLevels, (up.titlesRestartNumbering.toLowerCase() === "true"), up.styleData, (up.anyHeadings.toLowerCase() === "true"));
   }
 }
+
+/**
+ * Requests that heading levels are increased
+ * Intended for menu to call
+ */
 function increaseHeadingLevels() {
   changeHeadingLevels("up")
 }
+
+/**
+ * Requests that heading levels are decreased
+ * Intended for menu to call
+ */
 function decreaseHeadingLevels() {
   changeHeadingLevels("down")
 }
@@ -327,6 +353,14 @@ function numberHeadings(add = false, skipHeadings = false, skippedLevels, titles
   }
 }
 
+/**
+ * Changes the level of a heading up or down
+ *
+ * @param {string} direction 'up' to increase the level of all headings, 'down'
+ * @param {boolean} skipHeadings Whether to process all or only on some levels.
+ * @param {string} skippedLevels The levels to skip as a comma separated list.
+ * @return {Object} Object containing the before and after headings as a result of the operation.
+ */
 function changeHeadingLevels(direction = '', skipHeadings = false, skippedLevels) {
   let document = DocumentApp.getActiveDocument()
   let body = document.getBody()
@@ -463,6 +497,14 @@ function convertToAlpha(num, uppercase = false) {
   return uppercase ? char.repeat(num + 1).toUpperCase() : char.repeat(num + 1);
 }
 
+/**
+ * Returns the "number" based on the level style and level breaker
+ *
+ * @param {number} num The number to render
+ * @param {object} style styleData from the preferences
+ * @param {number} level The heading level that the number is to be rendered for
+ * @return {string} The character that is the heading separator
+ **/
 function generateHeadingNumber(num, style, level) {
   switch (level) {
     case 1:
@@ -480,6 +522,14 @@ function generateHeadingNumber(num, style, level) {
   }
 }
 
+/**
+ * Returns the "number" based on the level style and level breaker
+ *
+ * @param {number} num The number to render
+ * @param {levelstyle} string The identifier of the style for the level being rendered
+ * @param {levelbreaker} string The identifier of the breaker for the level being rendered
+ * @return {string} The string that the number and breaker was rendered into
+ **/
 function generateNumber(num, levelstyle, levelbreaker) {
   var result = "";
 
@@ -532,10 +582,9 @@ function generateNumber(num, levelstyle, levelbreaker) {
 /**
  * Returns the actual separator character from the style object
  *
- * @param {string} style  styleData from the preferences
+ * @param {object} style  styleData from the preferences
  * @return {string} The character that is the heading separator
  **/
-
 function getSeparator(style) {
   switch (style.hseparator) {
     case "space":
@@ -553,206 +602,12 @@ function getSeparator(style) {
   }
 }
 
-
+/**
+ * Returns the regular expression that selects any numbers supported, with the configured trailing separator
+ *
+ * @param {object} style  styleData from the preferences
+ * @return {string} The regular expression
+ **/
 function getRegexStringFromStyle(style) {
   return "^\\(?(([0-9]+)|([a-z]+)|([A-Z]+))(([\\)\\.\\-:;])\\(?(([0-9]+)|([a-z]+)|([A-Z]+)))*([\\)\\.\\-:;])" + getSeparator(style);
 }
-
-function getRegexStringFromStyleV2(style) {
-  var styleSettings = {
-    leadingOpen: false,
-    trailingClose: false,
-    trailingDot: false,
-    trailingDash: false,
-    trailingColon: false,
-    trailingSemicolon: false,
-    numbers: false,
-    lowerAlpha: false,
-    upperAlpha: false,
-    lowerRoman: false,
-    upperRoman: false
-  };
-
-  if (style.h1breaker == "running-dot") {
-    styleSettings = getStyleSettings(style.h1style, style.h1breaker, styleSettings);
-  } else {
-    styleSettings = getStyleSettings(style.h1style, style.h1breaker, styleSettings);
-    styleSettings = getStyleSettings(style.h2style, style.h2breaker, styleSettings);
-    styleSettings = getStyleSettings(style.h3style, style.h3breaker, styleSettings);
-    styleSettings = getStyleSettings(style.h4style, style.h4breaker, styleSettings);
-    styleSettings = getStyleSettings(style.h5style, style.h5breaker, styleSettings);
-    styleSettings = getStyleSettings(style.h6style, style.h6breaker, styleSettings);
-  }
-
-  var orNeeded = false;
-  var regexString = "^";
-  if (styleSettings.leadingOpen) {
-    regexString += "\\(?";
-  }
-  regexString += "(?:";
-  if (styleSettings.numbers) {
-    regexString += "(?:[0-9]+(?:\\.[0-9]+)*)";  // this handles 1. and 1.1.1.1.1.1., but doesn't handle 1)1)1)1)1)1)  ToDo: Fix
-    orNeeded = true;
-  }
-  if (styleSettings.lowerAlpha) {
-    if (orNeeded) regexString += "|";
-    // regexString += "(?:[a-z]|(?<az>[a-z])\\k<az>+)";  // re2 doesn't support \k<name> :-(
-    regexString += "(?:[a-z]+)"; // this handles a. and aaaaa. but not a.a.  (and . must be of the valid set)  ToDo: Fix
-    orNeeded = true;
-  }
-  if (styleSettings.upperAlpha) {
-    if (orNeeded) regexString += "|";
-    // regexString += "(?:[A-Z]|(?<AZ>[A-Z])\\k<AZ>+)";
-    regexString += "(?:[A-Z]+)";
-    orNeeded = true;
-  }
-  if (styleSettings.lowerRoman) {
-    if (orNeeded) regexString += "|";
-    // regexString += "(?:\\b(?=[mdclxvi]+\\b)m{0,3}(?:cm|cd|d?c{0,3})(?:xc|xl|l?x{0,3})(?:ix|iv|v?i{0,3})\\b)";  // re2 doesn't support this
-    regexString += "(?:[mdclxvi]+)";
-    orNeeded = true;
-  }
-  if (styleSettings.upperRoman) {
-    if (orNeeded) regexString += "|";
-    // regexString += "(?:\\b(?=[MDCLXVI]+\\b)M{0,3}(?:CM|CD|D?C{0,3})(?:XC|XL|L?X{0,3})(?:IX|IV|V?I{0,3})\\b)";
-    regexString += "(?[MDCLXVI]+)";
-    orNeeded = true;
-  }
-  regexString += ")(?:";
-  orNeeded = false;
-  if (styleSettings.trailingClose) {
-    regexString += "\\)";
-    orNeeded = true;
-  }
-  if (styleSettings.trailingDot) {
-    if (orNeeded) regexString += "|";
-    regexString += "\\.";
-    orNeeded = true;
-  }
-  if (styleSettings.trailingDash) {
-    if (orNeeded) regexString += "|";
-    regexString += "-";
-    orNeeded = true;
-  }
-  if (styleSettings.trailingColon) {
-    if (orNeeded) regexString += "|";
-    regexString += ":";
-    orNeeded = true;
-  }
-  if (styleSettings.trailingSemicolon) {
-    if (orNeeded) regexString += "|";
-    regexString += ";";
-  }
-  regexString += ")";
-  regexString += getSeparator(style);
-  return regexString;
-}
-
-function getStyleSettings(levelstyle, levelbreaker, styleSettings) {
-  switch (levelstyle) {
-    case "number":
-    case "d-number":
-      styleSettings.numbers = true;
-      break;
-    case "l-alpha":
-      styleSettings.lowerAlpha = true;
-      break
-    case "u-alpha":
-      styleSettings.upperAlpha = true;
-      break
-    case "l-roman":
-      styleSettings.lowerRoman = true;
-      break
-    case "u-roman":
-      styleSettings.upperRoman = true;
-      break
-  }
-  switch (levelbreaker) {
-    case "dot":
-    case "running-dot":
-      styleSettings.trailingDot = true;
-      break;
-    case "close-bracket":
-      styleSettings.trailingClose = true;
-      break;
-    case "open-close-bracket":
-      styleSettings.leadingOpen = true;
-      styleSettings.trailingClose = true;
-      break;
-    case "dash":
-      styleSettings.trailingDash = true;
-      break;
-    case "colon":
-      styleSettings.trailingColon = true;
-      break;
-    case "semicolon":
-      styleSettings.trailingSemicolon = true;
-      break;
-  }
-
-  return styleSettings;
-}
-
-/*
-
-// Deprecated functions
-
-function getRegexStringFromStyleV1(style) {
-  switch (style) {
-    case "number":
-    case "d-number":
-      return "[0-9]+";
-    case "l-alpha":
-      return "[a-z]{1}|([a-z])\1+";
-    case "u-alpha":
-      return "[A-Z]+";
-    case "l-roman":
-      return "m{0,3}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3})";
-    case "u-roman":
-      return "M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})";
-  }
-}
-
-function getRegexStringFromBreaker(breaker) {
-  switch (breaker) {
-    case "dot":
-    case "running-dot":
-      return "\\.";
-    case "close-bracket":
-      return "\\)";
-    case "open-close-bracket":
-      return "\\(%s\\)";
-    case "dash":
-      return "-";
-    case "colon":
-      return ":";
-    case "semicolon":
-      return ";";
-  }
-}
-
-function getRegexStringFromStyleAndBreaker(style, breaker) {
-  switch (style) {
-    case "l-alpha":
-    case "u-alpha":
-    default:
-      switch (breaker) {
-        case "dot":
-          return getRegexStringFromStyle(style) + "\\.";
-        case "running-dot":
-          return getRegexStringFromStyle(style) + "\\.";
-        case "close-bracket":
-          return getRegexStringFromStyle(style) + "\\)";
-        case "open-close-bracket":
-          return "\\(" + getRegexStringFromStyle(style) + "\\)";
-        case "dash":
-          return getRegexStringFromStyle(style) + "-";
-        case "colon":
-          return getRegexStringFromStyle(style) + ":";
-        case "semicolon":
-          return getRegexStringFromStyle(style) + ";";
-      }
-  }
-}
-
-*/
