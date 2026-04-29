@@ -314,7 +314,7 @@
         target='_blank'>lpanebr</a></span>
   </div>
 
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script>
     /**
      * On document load, assign click handlers to each button and try to load the
@@ -322,6 +322,14 @@
      */
     $(function () {
       $('#run-autonumber').click(runAutonumber);
+      $('#heading-1-breaker').change(function() {
+        if ($(this).val() == "running-dot") {
+          $("#heading-1-style").val("number");
+          disableHeadings();
+        } else {
+          enableHeadings();
+        }
+      });
       google.script.run.withSuccessHandler(loadPreferences)
         .withFailureHandler(showError).getPreferences();
     });
@@ -351,7 +359,7 @@
       $("#heading-separator").val(autonumberPrefs.styleData.hseparator);
       $("#appendix-separate-style").prop('checked', autonumberPrefs.styleData.appendix);
       $("#appendix-prefix").val(autonumberPrefs.styleData.appendixPrefix);
-      if (anyHeadings) {
+      if (autonumberPrefs.styleData.anyHeadings) {
         $("radio-matching-any").attr('checked', true);
       } else {
         $("radio-matching-hash-numbered").attr('checked', true);
@@ -359,6 +367,39 @@
       $('#titles-restart-numbering').prop('checked', autonumberPrefs.titlesRestartNumbering.toLowerCase() === "true");
       $('#skip-headings').prop('checked', autonumberPrefs.skipHeadings.toLowerCase() === "true");
       $('#skipped-levels').val(autonumberPrefs.skippedLevels);
+      if (autonumberPrefs.styleData.h1breaker == "running-dot") {
+        disableHeadings();
+      } else {
+        enableHeadings();
+      }
+    }
+
+    function disableHeadings() {
+      $("#heading-2-breaker").prop('disabled', true);
+      $("#heading-3-breaker").prop('disabled', true);
+      $("#heading-4-breaker").prop('disabled', true);
+      $("#heading-5-breaker").prop('disabled', true);
+      $("#heading-6-breaker").prop('disabled', true);
+      $("#heading-1-style").prop('disabled', true);
+      $("#heading-2-style").prop('disabled', true);
+      $("#heading-3-style").prop('disabled', true);
+      $("#heading-4-style").prop('disabled', true);
+      $("#heading-5-style").prop('disabled', true);
+      $("#heading-6-style").prop('disabled', true);
+    }
+
+    function enableHeadings() {
+      $("#heading-2-breaker").prop('disabled', false);
+      $("#heading-3-breaker").prop('disabled', false);
+      $("#heading-4-breaker").prop('disabled', false);
+      $("#heading-5-breaker").prop('disabled', false);
+      $("#heading-6-breaker").prop('disabled', false);
+      $("#heading-1-style").prop('disabled', false);
+      $("#heading-2-style").prop('disabled', false);
+      $("#heading-3-style").prop('disabled', false);
+      $("#heading-4-style").prop('disabled', false);
+      $("#heading-5-style").prop('disabled', false);
+      $("#heading-6-style").prop('disabled', false);   
     }
 
     /**
