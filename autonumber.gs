@@ -76,20 +76,20 @@ function showSidebar() {
 
 function numberHeadingsAdd() {
   let up = getPreferences();
-  if (up.restrictWithHash === null) {
-    // Assume that if restrictWithHash is missing, then there are no preferences
+  if (up.anyHeadings === null) {
+    // Assume that if anyHeadings is missing, then there are no preferences
     numberHeadings(true, false, '', false, false, null, true);
   } else {
-    numberHeadings(true, (up.skipHeadings.toLowerCase() === "true"), up.skippedLevels, (up.titlesRestartNumbering.toLowerCase() === "true"), (up.selectionOnly.toLowerCase() === "true"), up.styleData, (up.restrictWithHash.toLowerCase() === "true"));
+    numberHeadings(true, (up.skipHeadings.toLowerCase() === "true"), up.skippedLevels, (up.titlesRestartNumbering.toLowerCase() === "true"), (up.selectionOnly.toLowerCase() === "true"), up.styleData, (up.anyHeadings.toLowerCase() === "true"));
   }
 }
 function numberHeadingsRemove() {
   let up = getPreferences();
-  if (up.restrictWithHash === null) {
-    // Assume that if restrictWithHash is missing, then there are no preferences
+  if (up.anyHeadings === null) {
+    // Assume that if anyHeadings is missing, then there are no preferences
     numberHeadings(false, false, '', false, false, null, true);
   } else {
-    numberHeadings(false, (up.skipHeadings.toLowerCase() === "true"), up.skippedLevels, (up.titlesRestartNumbering.toLowerCase() === "true"), (up.selectionOnly.toLowerCase() === "true"), up.styleData, (up.restrictWithHash.toLowerCase() === "true"));
+    numberHeadings(false, (up.skipHeadings.toLowerCase() === "true"), up.skippedLevels, (up.titlesRestartNumbering.toLowerCase() === "true"), (up.selectionOnly.toLowerCase() === "true"), up.styleData, (up.anyHeadings.toLowerCase() === "true"));
   }
 }
 function increaseHeadingLevels() {
@@ -108,11 +108,11 @@ function decreaseHeadingLevels() {
  * @param {string} skippedLevels The levels to skip as a comma separated list.
  * @param {boolean} titlesRestartNumbering Whether a Title will reset numbering.
  * @param {object} styleData JSON object with the styling information
- * @param {boolean} restrictWithHash Whether to only process Headings starting with # or the defined pattern
+ * @param {boolean} anyHeadings Whether to only process Headings starting with # or the defined pattern
  * @return {Object} Not implemented: Object containing the resulting text and the result of the
  *     operation (success or error).
  */
-function processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbering, selectionOnly, styleData, restrictWithHash) {
+function processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbering, selectionOnly, styleData, anyHeadings) {
   let result
   switch (action) {
     case 'promote':
@@ -127,7 +127,7 @@ function processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbe
 
     case 'remove':
       // 
-      result = numberHeadings(false, skipHeadings, skippedLevels, titlesRestartNumbering, selectionOnly, styleData, restrictWithHash);
+      result = numberHeadings(false, skipHeadings, skippedLevels, titlesRestartNumbering, selectionOnly, styleData, anyHeadings);
       break
 
     case 'save':
@@ -146,7 +146,7 @@ function processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbe
         .setProperty('titlesRestartNumbering', titlesRestartNumbering)
         .setProperty('selectionOnly', selectionOnly)
         .setProperty('styleData', JSON.stringify(styleData))
-        .setProperty('restrictWithHash', restrictWithHash);
+        .setProperty('anyHeadings', anyHeadings);
 
       result = {
         before: "",
@@ -157,7 +157,7 @@ function processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbe
 
     default:
       //
-      result = numberHeadings(true, skipHeadings, skippedLevels, titlesRestartNumbering, selectionOnly, styleData, restrictWithHash);
+      result = numberHeadings(true, skipHeadings, skippedLevels, titlesRestartNumbering, selectionOnly, styleData, anyHeadings);
       break
   }
   // const text = getSelectedText().join('\n');
@@ -165,7 +165,7 @@ function processHeadings(action, skipHeadings, skippedLevels, titlesRestartNumbe
 }
 
 
-function numberHeadings(add = false, skipHeadings = false, skippedLevels, titlesRestartNumbering, selectionOnly, styleData, restrictWithHash) {
+function numberHeadings(add = false, skipHeadings = false, skippedLevels, titlesRestartNumbering, selectionOnly, styleData, anyHeadings) {
   let document = DocumentApp.getActiveDocument();
   let paragraphs = selectionOnly ? document.getSelection().getRangeElements().map(re => re.getElement().asParagraph()) : document.getParagraphs();
   let numbers = [0, 0, 0, 0, 0, 0, 0];
@@ -201,6 +201,16 @@ function numberHeadings(add = false, skipHeadings = false, skippedLevels, titles
 
   if (styleData.h1breaker == "running-dot") {
     styleData.h1style = "number";
+    styleData.h2style = "number";
+    styleData.h2breaker = "running-dot";
+    styleData.h3style = "number";
+    styleData.h3breaker = "running-dot";
+    styleData.h4style = "number";
+    styleData.h4breaker = "running-dot";
+    styleData.h5style = "number";
+    styleData.h5breaker = "running-dot";
+    styleData.h6style = "number";
+    styleData.h6breaker = "running-dot";
   }
   let ultimateRegex = getRegexStringFromStyle(styleData);
 
@@ -243,7 +253,22 @@ function numberHeadings(add = false, skipHeadings = false, skippedLevels, titles
     element.replaceText(ultimateRegex, "# ")
     if (styleData.appendix) {
       element.replaceText(appendixFindText, appendixReplaceHash)
+      text = element.getText() + '';
+      if (anyHeadings && !(text.startsWith(appendixReplaceHash) || text.startsWith("# "))) {
+        element.editAsText().insertText(0, '# ');
+      }
+    } else {
+      text = element.getText() + '';
+      if (anyHeadings && !text.startsWith("# ")) {
+        element.editAsText().insertText(0, '# ');
+      }
     }
+
+    // Remove the # from headings (except Appendicies) if remove and anyHeadings
+    if (!add && anyHeadings) {
+      element.replaceText("^# ", "");
+    }
+
     text = element.getText() + '';
     
     if (add == true && text.match(appendixHeadingFind)) {
@@ -366,7 +391,7 @@ function getPreferences() {
   return {
     action: userProperties.getProperty('action'),
     styleData: JSON.parse(userProperties.getProperty('styleData')),
-    restrictWithHash: userProperties.getProperty('restrictWithHash'),
+    anyHeadings: userProperties.getProperty('anyHeadings'),
     selectionOnly: userProperties.getProperty('selectionOnly'),
     titlesRestartNumbering: userProperties.getProperty('titlesRestartNumbering'),
     skipHeadings: userProperties.getProperty('skipHeadings'),
@@ -510,8 +535,11 @@ function getSeparator(style) {
 }
 
 
-
 function getRegexStringFromStyle(style) {
+  return "^\\(?(([0-9]+)|([a-z]+)|([A-Z]+))(([\\)\\.\\-:;])\\(?(([0-9]+)|([a-z]+)|([A-Z]+)))*([\\)\\.\\-:;])" + getSeparator(style);
+}
+
+function getRegexStringFromStyleV2(style) {
   var styleSettings = {
     leadingOpen: false,
     trailingClose: false,
