@@ -393,7 +393,6 @@ function changeHeadingLevels(direction = '', skipHeadings = false, skippedLevels
     if (text.match(/^\s*$/)) {
       continue;
     }
-    console.log(type)
 
     before.push(current_paragraph.getText())
 
