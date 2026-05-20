@@ -461,7 +461,7 @@ function getPreferences() {
         appendix: false,
         appendixPrefix: "Appendix "
       },
-      anyHeadings: "false", // This is a string as that is what the getProperty would return
+      anyHeadings: "true", // This is a string as that is what the getProperty would return
       titlesRestartNumbering: "false",
       skipHeadings: "false",
       skippedLevels: ""
